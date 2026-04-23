@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AI 自动化助手</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="hljs-light">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-dark" disabled>
+</head>
+<body>
+  <!-- Mobile menu button -->
+  <button id="mobile-menu-btn" class="mobile-menu-btn" type="button" aria-label="打开菜单">☰</button>
+  
+  <!-- Sidebar overlay for mobile -->
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+  <div class="layout">
+    <aside class="panel sidebar" id="sidebar">
+      <h1>AI 自动化助手</h1>
+      <p class="subtitle">当前程序已经改成服务端。你可以直接通过网页发起对话、切换模型，并查看技能调用结果。</p>
+
+      <button id="new-session" class="button secondary" type="button" style="margin-bottom: 18px;">新会话</button>
+
+      <div id="status" class="status">正在加载服务状态...</div>
+
+      <div class="field" style="margin-top: 18px;">
+        <label>运行中的服务</label>
+        <div class="button-row" style="margin-top: 0;">
+          <button id="refresh-servers" class="button secondary" type="button">刷新服务</button>
+          <button id="stop-all-servers" class="button secondary" type="button">全部关闭</button>
+        </div>
+        <div id="server-list" class="server-list"></div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button id="theme-toggle" class="icon-button" type="button" title="切换主题">主题</button>
+        <button id="open-settings" class="icon-button" type="button" title="设置">❉</button>
+        <button id="logout-btn" class="icon-button" type="button" title="退出登录">▶</button>
+      </div>
+    </aside>
+
+    <main class="panel main">
+      <div class="topbar">
+        <div>
+          <strong>网页会话</strong>
+          <div class="meta" id="session-meta">会话初始化中...</div>
+        </div>
+        <div class="meta" id="model-meta">模型加载中...</div>
+      </div>
+
+      <section id="messages" class="messages"></section>
+
+      <form id="chat-form" class="composer">
+        <textarea id="message-input" class="textarea" placeholder="输入你的问题，例如：帮我分析当前项目结构，或者帮我写一个脚本并运行测试。"></textarea>
+        <div class="button-group">
+          <button id="stop-button" class="button stop" type="button" style="display: none;">停止</button>
+          <button id="send-button" class="button send" type="submit">发送</button>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <!-- 设置弹窗 -->
+  <div id="settings-modal" class="modal-overlay">
+    <div class="modal settings-modal">
+      <div class="modal-header">
+        <div class="header-left">
+          <div class="header-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </div>
+          <h2>设置</h2>
+        </div>
+        <button id="close-settings" class="modal-close" type="button" aria-label="关闭设置">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body settings-body">
+        <!-- Left Navigation -->
+        <div class="settings-nav">
+          <button class="nav-item active" data-tab="model">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+              <line x1="8" y1="21" x2="16" y2="21"/>
+              <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+            <span>模型设置</span>
+          </button>
+          <button class="nav-item" data-tab="api">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span>API 配置</span>
+          </button>
+          <button class="nav-item" data-tab="theme">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+              <line x1="18.36" y1="18.36" x2="20.78" y2="20.78"/>
+            </svg>
+            <span>外观设置</span>
+          </button>
+          <button class="nav-item" data-tab="about">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="16" x2="12" y2="12"/>
+              <line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+            <span>关于</span>
+          </button>
+        </div>
+
+        <!-- Right Content -->
+        <div class="settings-content">
+          <!-- Model Settings Tab -->
+          <div class="tab-content active" id="tab-model">
+            <div class="settings-section">
+              <div class="section-header">
+                <h3>当前模型</h3>
+                <p class="section-desc">选择和管理您正在使用的 AI 模型</p>
+              </div>
+              
+              <div class="config-card">
+                <div class="config-item">
+                  <label class="config-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                    接口地址
+                  </label>
+                  <div class="config-value-wrapper">
+                    <code id="api-url-display" class="api-url-text"></code>
+                    <input id="api-url" class="input" type="text" readonly style="display:none;">
+                  </div>
+                </div>
+                
+                <div class="config-item">
+                  <label class="config-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                      <line x1="8" y1="21" x2="16" y2="21"/>
+                      <line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                    当前模型
+                  </label>
+                  <select id="model-select" class="select modern-select"></select>
+                </div>
+
+                <div class="action-buttons">
+                  <button id="save-model" class="btn btn-primary" type="button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                      <polyline points="17 21 17 13 7 13 7 21"/>
+                      <polyline points="7 3 7 8 15 8"/>
+                    </svg>
+                    应用模型
+                  </button>
+                  <button id="refresh-config" class="btn btn-secondary" type="button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="23 4 23 10 17 10"/>
+                      <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                    </svg>
+                    刷新配置
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <div class="section-header">
+                <h3>模型管理</h3>
+                <p class="section-desc">添加、配置或删除模型</p>
+              </div>
+
+              <div class="model-manager">
+                <details class="add-model-section">
+                  <summary class="add-model-toggle">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="12" y1="8" x2="12" y2="16"/>
+                      <line x1="8" y1="12" x2="16" y2="12"/>
+                    </svg>
+                    添加新模型
+                  </summary>
+                  <div class="add-model-form">
+                    <div class="form-group">
+                      <label for="new-model-input">模型名称 <span class="required">*</span></label>
+                      <input id="new-model-input" class="input modern-input" type="text" placeholder="例如：gpt-4, claude-3-sonnet">
+                    </div>
+                    <div class="form-group">
+                      <label for="new-model-api-url">API 接口地址</label>
+                      <input id="new-model-api-url" class="input modern-input" type="text" placeholder="https://api.openai.com/v1/chat/completions">
+                    </div>
+                    <div class="form-group">
+                      <label for="new-model-api-key">API 密钥</label>
+                      <input id="new-model-api-key" class="input modern-input" type="password" placeholder="sk-...">
+                    </div>
+                    <button id="add-model-btn" class="btn btn-primary btn-full" type="button">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                      </svg>
+                      添加模型
+                    </button>
+                  </div>
+                </details>
+
+                <div class="models-list-wrapper">
+                  <h4 class="list-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="8" y1="6" x2="21" y2="6"/>
+                      <line x1="8" y1="12" x2="21" y2="12"/>
+                      <line x1="8" y1="18" x2="21" y2="18"/>
+                      <line x1="3" y1="6" x2="3.01" y2="6"/>
+                      <line x1="3" y1="12" x2="3.01" y2="12"/>
+                      <line x1="3" y1="18" x2="3.01" y2="18"/>
+                    </svg>
+                    已添加的模型
+                  </h4>
+                  <div id="models-list" class="models-list">
+                    <!-- Models will be listed here -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- API Config Tab -->
+          <div class="tab-content" id="tab-api">
+            <div class="settings-section">
+              <div class="section-header">
+                <h3>全局 API 配置</h3>
+                <p class="section-desc">设置默认的 API 地址和密钥</p>
+              </div>
+
+              <div class="config-card">
+                <div class="form-group">
+                  <label for="api-config-url" class="form-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="2" y1="12" x2="22" y2="12"/>
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                    </svg>
+                    接口地址
+                  </label>
+                  <input id="api-config-url" class="input modern-input" type="text" placeholder="https://api.example.com/v1/chat/completions">
+                  <span class="form-hint">OpenAI 兼容的聊天 API 端点</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="api-config-key" class="form-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                    API 密钥
+                  </label>
+                  <input id="api-config-key" class="input modern-input" type="password" placeholder="sk-xxxxxxxxxxxxxxxx">
+                  <span class="form-hint">您的密钥将被安全加密存储</span>
+                </div>
+
+                <div class="action-buttons">
+                  <button id="save-api-config" class="btn btn-primary" type="button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                      <polyline points="17 21 17 13 7 13 7 21"/>
+                      <polyline points="7 3 7 8 15 8"/>
+                    </svg>
+                    保存配置
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Theme Tab -->
+          <div class="tab-content" id="tab-theme">
+            <div class="settings-section">
+              <div class="section-header">
+                <h3>外观设置</h3>
+                <p class="section-desc">选择您喜欢的主题风格</p>
+              </div>
+
+              <div class="theme-selector">
+                <div class="theme-option light" data-theme="light">
+                  <input type="radio" name="theme" value="light" id="theme-light">
+                  <label for="theme-light" class="theme-card-label">
+                    <div class="theme-preview-card light-preview">
+                      <div class="preview-topbar">
+                        <div class="preview-dot"></div>
+                        <div class="preview-dot"></div>
+                        <div class="preview-dot"></div>
+                      </div>
+                      <div class="preview-content">
+                        <div class="preview-msg user"></div>
+                        <div class="preview-msg assistant"></div>
+                      </div>
+                    </div>
+                    <div class="theme-info">
+                      <span class="theme-name">☀️ 亮色模式</span>
+                      <span class="theme-desc">适合光线充足的环境</span>
+                    </div>
+                  </label>
+                </div>
+
+                <div class="theme-option dark" data-theme="dark">
+                  <input type="radio" name="theme" value="dark" id="theme-dark">
+                  <label for="theme-dark" class="theme-card-label">
+                    <div class="theme-preview-card dark-preview">
+                      <div class="preview-topbar">
+                        <div class="preview-dot"></div>
+                        <div class="preview-dot"></div>
+                        <div class="preview-dot"></div>
+                      </div>
+                      <div class="preview-content">
+                        <div class="preview-msg user"></div>
+                        <div class="preview-msg assistant"></div>
+                      </div>
+                    </div>
+                    <div class="theme-info">
+                      <span class="theme-name">🌙 暗色模式</span>
+                      <span class="theme-desc">适合低光环境，减少眼睛疲劳</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- About Tab -->
+          <div class="tab-content" id="tab-about">
+            <div class="settings-section">
+              <div class="section-header">
+                <h3>关于</h3>
+                <p class="section-desc">了解此应用程序</p>
+              </div>
+
+              <div class="about-card">
+                <div class="about-icon-large">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/>
+                    <path d="M2 12l10 5 10-5"/>
+                  </svg>
+                </div>
+                <h4 class="app-title">AI 自动化助手</h4>
+                <p class="app-description">一个功能强大的 AI 助手，支持技能调用、代码编写和执行。</p>
+                
+                <div class="features-grid">
+                  <div class="feature-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>多模型支持</span>
+                  </div>
+                  <div class="feature-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>技能调用</span>
+                  </div>
+                  <div class="feature-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>代码执行</span>
+                  </div>
+                  <div class="feature-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>流式响应</span>
+                  </div>
+                </div>
+
+                <div class="about-divider"></div>
+
+                <div class="version-info">
+                  <span>版本 1.0.0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 图片灯箱 -->
+  <div id="image-lightbox" class="image-lightbox">
+    <img id="image-lightbox-img" src="" alt="">
+  </div>
+
+  <!-- Third-party libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+
+  <!-- Application script -->
+  <script src="/js/app.js"></script>
+</body>
+</html>

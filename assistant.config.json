@@ -1,0 +1,12 @@
+{
+  "apiUrl": "https://integrate.api.nvidia.com/v1/chat/completions",
+  "apiKey": "xxxx",
+  "currentModel": "openai/gpt-oss-120b",
+  "availableModels": [
+    "nvidia/nemotron-3-super-120b-a12b",
+    "stepfun-ai/step-3.5-flash",
+    "openai/gpt-oss-120b",
+    "google/gemma-4-31b-it",
+    "openai/gpt-oss-20b"
+  ]
+}

@@ -1,0 +1,262 @@
+{
+  "skills": [
+    {
+      "name": "execute_command",
+      "description": "执行系统命令。用于文件操作、系统信息获取等。",
+      "when_to_use": "用户要求执行系统命令、获取目录、获取系统信息、文件操作 (重命名、复制、移动) 时使用。",
+      "parameters": [
+        {
+          "name": "command",
+          "type": "string",
+          "description": "要执行的命令"
+        },
+        {
+          "name": "cwd",
+          "type": "string",
+          "description": "工作目录 (可选)"
+        }
+      ]
+    },
+    {
+      "name": "start_server",
+      "description": "启动后台服务器程序。",
+      "when_to_use": "用户要求启动 Web 服务器、API 服务、后台服务时使用。服务器会在后台运行，不会阻塞。",
+      "parameters": [
+        {
+          "name": "filename",
+          "type": "string",
+          "description": "服务器文件名"
+        },
+        {
+          "name": "language",
+          "type": "string",
+          "description": "编程语言 (可选)"
+        },
+        {
+          "name": "port",
+          "type": "number",
+          "description": "服务端口 (可选)"
+        }
+      ]
+    },
+    {
+      "name": "stop_server",
+      "description": "停止后台运行的服务器程序。",
+      "when_to_use": "用户要求停止服务器、关闭服务时使用。可以按端口、PID 或服务器 ID 停止。",
+      "parameters": [
+        {
+          "name": "serverId",
+          "type": "string",
+          "description": "服务器 ID(可选)"
+        },
+        {
+          "name": "port",
+          "type": "number",
+          "description": "端口号 (可选)"
+        },
+        {
+          "name": "pid",
+          "type": "number",
+          "description": "进程 ID(可选)"
+        }
+      ]
+    },
+    {
+      "name": "list_servers",
+      "description": "列出所有后台运行的服务器程序。",
+      "when_to_use": "用户要求查看运行中的服务器时使用。",
+      "parameters": []
+    },
+    {
+      "name": "add_skill",
+      "description": "动态添加新技能到系统中。",
+      "when_to_use": "用户要求创建新技能、扩展系统功能时使用。",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "技能名称"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "description": "技能描述"
+        },
+        {
+          "name": "when_to_use",
+          "type": "string",
+          "description": "使用场景"
+        },
+        {
+          "name": "code",
+          "type": "string",
+          "description": "技能代码"
+        },
+        {
+          "name": "parameters",
+          "type": "array",
+          "description": "参数定义"
+        }
+      ]
+    },
+    {
+      "name": "remove_skill",
+      "description": "从系统中删除指定技能。",
+      "when_to_use": "用户要求删除不需要的技能时使用。",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "要删除的技能名称"
+        }
+      ]
+    },
+    {
+      "name": "list_skill_templates",
+      "description": "获取技能模板列表。",
+      "when_to_use": "用户需要了解如何创建新技能时使用。",
+      "parameters": [
+        {
+          "name": "type",
+          "type": "string",
+          "description": "模板类型：command, api, file, system"
+        }
+      ]
+    },
+    {
+      "name": "analyze_project",
+      "description": "分析项目情况，获取项目结构、依赖、代码统计等信息。",
+      "when_to_use": "用户想了解项目结构、项目情况、代码统计时使用。",
+      "parameters": [
+        {
+          "name": "projectPath",
+          "type": "string",
+          "description": "项目路径（可选，默认为当前目录）"
+        },
+        {
+          "name": "detail",
+          "type": "string",
+          "description": "详细程度：basic(基础), full(完整)"
+        }
+      ]
+    },
+    {
+      "name": "get_local_ip",
+      "description": "获取本机 IP 地址",
+      "when_to_use": "用户询问本机 IP、网络地址时使用",
+      "parameters": []
+    },
+    {
+      "name": "get_weather",
+      "description": "获取指定城市的天气信息",
+      "when_to_use": "用户询问天气、气温、天气预报时使用",
+      "parameters": [
+        {
+          "name": "city",
+          "type": "string",
+          "description": "城市名称"
+        }
+      ]
+    },
+    {
+      "name": "write_code",
+      "description": "编写代码并保存到文件",
+      "when_to_use": "用户要求编写代码、创建脚本时使用",
+      "parameters": [
+        {
+          "name": "filename",
+          "type": "string",
+          "description": "文件名"
+        },
+        {
+          "name": "language",
+          "type": "string",
+          "description": "编程语言"
+        },
+        {
+          "name": "code",
+          "type": "string",
+          "description": "代码内容"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "description": "功能描述"
+        }
+      ]
+    },
+    {
+      "name": "run_code",
+      "description": "执行代码文件 (短时间运行的程序)",
+      "when_to_use": "用户要求运行、测试普通代码时使用。注意：服务器程序请使用 start_server",
+      "parameters": [
+        {
+          "name": "filename",
+          "type": "string",
+          "description": "文件名"
+        },
+        {
+          "name": "language",
+          "type": "string",
+          "description": "编程语言 (可选)"
+        },
+        {
+          "name": "args",
+          "type": "array",
+          "description": "命令行参数"
+        }
+      ]
+    },
+    {
+      "name": "read_code",
+      "description": "读取已保存的代码文件内容",
+      "when_to_use": "用户要求查看、读取代码文件时使用",
+      "parameters": [
+        {
+          "name": "filename",
+          "type": "string",
+          "description": "文件名"
+        }
+      ]
+    },
+    {
+      "name": "list_code",
+      "description": "列出已保存的代码文件",
+      "when_to_use": "用户要求查看有哪些代码文件时使用",
+      "parameters": []
+    },
+    {
+      "name": "generate_image",
+      "description": "使用 AI 生成图片。根据文本描述生成高质量图片。",
+      "when_to_use": "用户要求生成图片、生成图片、创建图片时使用。",
+      "parameters": [
+        {
+          "name": "prompt",
+          "type": "string",
+          "description": "图片描述文本，详细描述需要生成的图片内容"
+        },
+        {
+          "name": "size",
+          "type": "string",
+          "description": "图片尺寸 (可选)，默认 1024x1920，支持 1024x1024, 1024x1920, 1920x1080 等"
+        },
+        {
+          "name": "numInferenceSteps",
+          "type": "number",
+          "description": "推理步数 (可选)，默认 29，值越高细节越丰富，但生成时间越长"
+        },
+        {
+          "name": "guidance_scale",
+          "type": "number",
+          "description": "引导系数 (可选)，默认 0.7，控制文本对生成的影响程度"
+        }
+      ]
+    },
+    {
+      "name": "get_stock_quotes",
+      "description": "获取预定义股票的行情信息",
+      "when_to_use": "用户需要获取股票行情、价格变化等信息时使用，当用户没有明说是哪一个股票时直接获取即可",
+      "parameters": []
+    }
+  ]
+}
